@@ -8,8 +8,8 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 
 # Configuration
-AES_KEY = b'\x00' * 16  # 128-bit key; MUST match DataGuardVpnService.java AES_KEY (replace with secure key)
-USERS_FILE = "/etc/dataguard/users.json"  # Hashed passwords stored here
+AES_KEY = bytes.fromhex("a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6")  # Replace with key from zi.sh/zi2.sh
+USERS_FILE = "/etc/dataguard/users.json"
 
 class UDPServerProtocol(asyncio.DatagramProtocol):
     def __init__(self):
@@ -47,7 +47,6 @@ class UDPServerProtocol(asyncio.DatagramProtocol):
     async def handle_data_packet(self, encrypted_data, addr):
         try:
             decrypted = self.decrypt_packet(encrypted_data)
-            # Parse IP packet (simplified; extract dest IP/port/protocol)
             dest_ip = ".".join(map(str, decrypted[16:20]))
             protocol = decrypted[9]
             ip_header_len = (decrypted[0] & 0x0F) * 4
