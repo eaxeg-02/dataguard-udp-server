@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # DataGuard UDP Server Installation Script for ARM
-# Tailored for DataGuard VPN app by [Your Name]
+# Tailored for DataGuard VPN app by Dawn
 # Installs Python dependencies, sets up UDP server with user auth, and runs as systemd service.
 
 if [ "$EUID" -ne 0 ]; then
