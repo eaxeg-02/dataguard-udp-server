@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# DataGuard UDP Server Installation Script for ARM
-# Tailored for DataGuard VPN app by Dawn
+# ShadePulseUDP Server Installation Script for ARM
+# Tailored for ShadePulseUDP VPN app by [Your Name]
 # Installs Python dependencies, sets up UDP server with user auth, and runs as systemd service.
 
 if [ "$EUID" -ne 0 ]; then
@@ -26,29 +26,32 @@ wget -O /usr/local/bin/udp_server.py https://raw.githubusercontent.com/eaxeg-02/
 chmod +x /usr/local/bin/udp_server.py
 
 # Create config directory
-mkdir -p /etc/dataguard
+mkdir -p /etc/shadepulseudp
 
 # Prompt for port, username, password
-read -p "Enter UDP listening port (default 5302): " port
-port=${port:-5302}
+read -p "Enter UDP listening port (default 300): " port
+port=${port:-300}
 
-read -p "Enter username: " username
+read -p "Enter username (default sijdjf): " username
+username=${username:-sijdjf}
 read -s -p "Enter password: " password
 echo
 
-# Generate hashed password
-hashed_pass=$(python3 -c "import hashlib; print(hashlib.sha256('$password'.encode()).hexdigest())")
+# Generate hashed username:password
+hashed_auth=$(python3 -c "import hashlib; print(hashlib.sha256('$username:$password'.encode()).hexdigest())")
 
 # Create users.json
-echo "{\"$username\": \"$hashed_pass\"}" > /etc/dataguard/users.json
+echo "{\"$username\": \"$hashed_auth\"}" > /etc/shadepulseudp/users.json
 
 # Create systemd service
-cat <<EOF > /etc/systemd/system/dataguard-udp.service
+cat <<EOF > /etc/systemd/system/shadepulseudp.service
 [Unit]
-Description=DataGuard UDP VPN Server
+Description=ShadePulseUDP VPN Server
 After=network.target
 
 [Service]
+Environment="AES_KEY=a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+Environment="USERS_FILE=/etc/shadepulseudp/users.json"
 ExecStart=/usr/bin/python3 /usr/local/bin/udp_server.py --port $port
 Restart=always
 User=root
@@ -59,9 +62,10 @@ EOF
 
 # Enable and start service
 systemctl daemon-reload
-systemctl enable dataguard-udp
-systemctl start dataguard-udp
+systemctl enable shadepulseudp
+systemctl start shadepulseudp
 
-echo "DataGuard UDP Server installed and running on port $port."
-echo "AES Key (share with app): $(openssl rand -hex 16)"  # Generate and print key for app
-echo "To add users, edit /etc/dataguard/users.json and restart service: systemctl restart dataguard-udp"
+echo "ShadePulseUDP Server installed and running on port $port."
+echo "AES Key (share with app): a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+echo "To add users, edit /etc/shadepulseudp/users.json and restart service: systemctl restart shadepulseudp"
+
